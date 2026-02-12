@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Passport KYC AI</title>
+
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#f4f6fb;
+    margin:0;
+}
+
+.container{
+    max-width:900px;
+    margin:40px auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.upload-box{
+    border:2px dashed #4a7cff;
+    padding:25px;
+    text-align:center;
+    border-radius:10px;
+    background:#f0f4ff;
+}
+
+button{
+    background:#4a7cff;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    margin-top:10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button:hover{
+    background:#2f5ee6;
+}
+
+.preview{
+    margin-top:20px;
+    display:flex;
+    gap:20px;
+    justify-content:center;
+}
+
+.card{
+    background:#fafafa;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.06);
+}
+
+.card img{
+    width:180px;
+    border-radius:8px;
+}
+
+.result{
+    margin-top:25px;
+    background:#0f172a;
+    color:#e2e8f0;
+    padding:18px;
+    border-radius:10px;
+    font-family:monospace;
+    white-space:pre-wrap;
+}
+
+.loading{
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+    color:#4a7cff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🛂 Passport Verification AI</h1>
+
+<div class="upload-box">
+    <input type="file" id="file">
+    <br>
+    <button onclick="upload()">Verify Passport</button>
+    <div class="loading" id="loading"></div>
+</div>
+
+<div class="preview">
+    <div class="card">
+        <h3>Photo</h3>
+        <img id="photo">
+    </div>
+
+    <div class="card">
+        <h3>Signature</h3>
+        <img id="sign">
+        <div id="nosign" style="font-size:13px;color:#888"></div>
+    </div>
+</div>
+
+<div class="result" id="result">
+Upload a passport to begin...
+</div>
+
+</div>
+
+<script>
+
+async function upload(){
+
+    let file=document.getElementById("file").files[0];
+    if(!file){ alert("Select an image"); return; }
+
+    document.getElementById("loading").innerText="Processing document...";
+    document.getElementById("result").innerText="";
+
+    let fd=new FormData();
+    fd.append("passport",file);
+
+    let res=await fetch("/verify-passport",{method:"POST",body:fd});
+    let data=await res.json();
+
+    document.getElementById("loading").innerText="";
+
+    // JSON result
+    document.getElementById("result").innerText=
+        JSON.stringify(data.data,null,2);
+
+    // photo
+    document.getElementById("photo").src=data.photo||"";
+
+    // signature
+    if(data.signature){
+        document.getElementById("sign").src=data.signature;
+        document.getElementById("nosign").innerText="";
+    }else{
+        document.getElementById("sign").src="";
+        document.getElementById("nosign").innerText="No signature detected";
+    }
+}
+
+</script>
+
+</body>
+</html>
